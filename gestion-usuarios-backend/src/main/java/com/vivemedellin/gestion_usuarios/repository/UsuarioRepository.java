@@ -5,6 +5,7 @@
 package com.vivemedellin.gestion_usuarios.repository;
 
 import com.vivemedellin.gestion_usuarios.entity.Usuario;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -13,5 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface UsuarioRepository extends JpaRepository<Usuario, String> {
     boolean existsByCorreoElectronico(String correoElectronico);
+    boolean existsByApodo(String apodo);
+    Optional<Usuario> findByCorreoElectronico(String correoElectronico);
 }
 

@@ -9,9 +9,11 @@ package com.vivemedellin.gestion_usuarios.entity;
  * @author David
  */
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "tblinteresesxusuario")
+@Data
 public class InteresXUsuario {
 
     @Id
@@ -20,36 +22,10 @@ public class InteresXUsuario {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "apodo", nullable = false)
+    @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "id_interes", nullable = false)
     private Interes interes;
-
-    // Getters y setters (puedes usar Lombok si lo prefieres)
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public Interes getInteres() {
-        return interes;
-    }
-
-    public void setInteres(Interes interes) {
-        this.interes = interes;
-    }
 }

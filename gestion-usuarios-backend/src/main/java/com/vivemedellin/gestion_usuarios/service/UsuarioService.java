@@ -9,11 +9,13 @@ import com.vivemedellin.gestion_usuarios.repository.InteresRepository;
 import com.vivemedellin.gestion_usuarios.repository.InteresXUsuarioRepository;
 import com.vivemedellin.gestion_usuarios.repository.MunicipioRepository;
 import com.vivemedellin.gestion_usuarios.repository.UsuarioRepository;
+import java.util.UUID;
+import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+
 
 @Service
 public class UsuarioService {
@@ -30,11 +32,31 @@ public class UsuarioService {
     @Autowired
     private InteresXUsuarioRepository interesXUsuarioRepository;
 
-    private static final List<String> PALABRAS_INAPROPIADAS = List.of("xxx", "admin", "mierda");
+    private static final List<String> PALABRAS_INAPROPIADAS = List.of("xxx", "puta", "mierda","pendiente");
+    
+    public Usuario autenticarOCrearUsuarioDesdeGoogle(String email) {
+        return usuarioRepository.findByCorreoElectronico(email)
+                .orElseGet(() -> {
+                    Usuario nuevoUsuario = new Usuario();
+                    Municipio municipio = new Municipio();
+                    municipio.setId(1);
+                    nuevoUsuario.setCorreoElectronico(email);
+                    nuevoUsuario.setNombre("PENDIENTE");
+                    nuevoUsuario.setApellido("PENDIENTE");
+                    nuevoUsuario.setApodo(UUID.randomUUID().toString().substring(0, 8)); // apodo temporal único
+                    nuevoUsuario.setContraseña(encriptarPassword("Pendiente")); // o algún placeholder
+                    nuevoUsuario.setFechaNacimiento(LocalDate.of(1900, 1, 1)); // placeholder válido
+                    nuevoUsuario.setCorreoVerificado(true);
+                    nuevoUsuario.setRegistradoManual(false);
+                    nuevoUsuario.setMunicipio(municipio);// si ya viene verificado por Google
+//                    nuevoUsuario.setRegistradoCon("GOOGLE");
+                    return usuarioRepository.save(nuevoUsuario);
+                });
+    }   
 
     public void registrarUsuario(RegistroUsuarioDTO dto) {
-        // Validar apodo
-        if (usuarioRepository.existsById(dto.getApodo())) {
+
+        if (usuarioRepository.existsByApodo(dto.getApodo())) {
             throw new IllegalArgumentException("El apodo ya está en uso.");
         }
 

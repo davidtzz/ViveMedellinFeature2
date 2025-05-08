@@ -9,12 +9,15 @@ package com.vivemedellin.gestion_usuarios.entity;
  * @author David
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
+import lombok.Data;
 
 @Entity
 @Table(name = "tblmunicipios")
+@Data
 public class Municipio {
 
     @Id
@@ -28,30 +31,6 @@ public class Municipio {
 
     // Relación con Usuario
     @OneToMany(mappedBy = "municipio")
+    @JsonIgnore
     private List<Usuario> usuarios;
-
-    // Getters y Setters
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public List<Usuario> getUsuarios() {
-        return usuarios;
-    }
-
-    public void setUsuarios(List<Usuario> usuarios) {
-        this.usuarios = usuarios;
-    }
 }

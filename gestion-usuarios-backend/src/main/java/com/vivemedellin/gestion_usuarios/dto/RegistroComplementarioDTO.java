@@ -4,7 +4,6 @@
  */
 package com.vivemedellin.gestion_usuarios.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -16,8 +15,8 @@ import lombok.Data;
  * @author David
  */
 @Data
-public class RegistroUsuarioDTO {
-
+public class RegistroComplementarioDTO {
+    
     @NotBlank
     private String apodo;
 
@@ -30,16 +29,6 @@ public class RegistroUsuarioDTO {
     private String apellido;
 
     private String segundoApellido;
-
-    @NotBlank
-    @Email
-    private String correoElectronico;
-
-    @NotBlank
-    private String contraseña;
-
-    @NotBlank
-    private String confirmarContraseña;
 
     private String fotoPerfil;
 
@@ -55,10 +44,4 @@ public class RegistroUsuarioDTO {
 
     @NotNull
     private List<Integer> idsIntereses;
-
-    public String getApodo() {
-        return apodo;
-    }
-
-
 }
