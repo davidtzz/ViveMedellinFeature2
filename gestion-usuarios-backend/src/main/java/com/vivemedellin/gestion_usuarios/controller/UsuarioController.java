@@ -51,6 +51,7 @@ public class UsuarioController {
     }
     
     private static final List<String> PALABRAS_INAPROPIADAS = List.of("xxx", "puta", "mierda","pendiente");
+    
     @PostMapping("/registro-complementario")
     public ResponseEntity<?> completarRegistro(@RequestBody RegistroComplementarioDTO dto, @RequestParam String email) {
         System.out.println("DTO recibido: " + dto);
