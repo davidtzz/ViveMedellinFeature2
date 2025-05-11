@@ -1,14 +1,10 @@
 package com.vivemedellin.gestion_usuarios.service;
 
 import com.vivemedellin.gestion_usuarios.dto.RegistroUsuarioDTO;
-import com.vivemedellin.gestion_usuarios.entity.Interes;
-import com.vivemedellin.gestion_usuarios.entity.InteresXUsuario;
-import com.vivemedellin.gestion_usuarios.entity.Municipio;
-import com.vivemedellin.gestion_usuarios.entity.Usuario;
-import com.vivemedellin.gestion_usuarios.repository.InteresRepository;
-import com.vivemedellin.gestion_usuarios.repository.InteresXUsuarioRepository;
-import com.vivemedellin.gestion_usuarios.repository.MunicipioRepository;
-import com.vivemedellin.gestion_usuarios.repository.UsuarioRepository;
+import com.vivemedellin.gestion_usuarios.entity.*;
+import com.vivemedellin.gestion_usuarios.repository.*;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +27,12 @@ public class UsuarioService {
 
     @Autowired
     private InteresXUsuarioRepository interesXUsuarioRepository;
+
+    @Autowired
+    private TokenVerificacionRepository tokenVerificacionRepository;
+
+    @Autowired
+    private CorreoService correoService;
 
     private static final List<String> PALABRAS_INAPROPIADAS = List.of("xxx", "puta", "mierda","pendiente");
     
@@ -113,6 +115,17 @@ public class UsuarioService {
 
     interesXUsuarioRepository.save(ixu);
 }
+        String token = UUID.randomUUID().toString();
+        TokenVerificacion tv = new TokenVerificacion();
+        tv.setToken(token);
+        tv.setUsuario(u);
+        tv.setExpiracion(LocalDateTime.now().plusHours(24)); // válido por 24h
+
+        tokenVerificacionRepository.save(tv);
+
+// Enviar correo
+        String link = "http://localhost:8080/api/usuarios/verificar?token=" + token;
+        correoService.enviarCorreoVerificacion(u.getCorreoElectronico(), link);
     }
 
     private boolean validarPassword(String password) {

@@ -56,9 +56,6 @@ public class RegistroUsuarioDTO {
     @NotNull
     private List<Integer> idsIntereses;
 
-    public String getApodo() {
-        return apodo;
-    }
 
 
 }

@@ -7,20 +7,16 @@ package com.vivemedellin.gestion_usuarios.controller;
 
 import com.vivemedellin.gestion_usuarios.dto.RegistroComplementarioDTO;
 import com.vivemedellin.gestion_usuarios.dto.RegistroUsuarioDTO;
-import com.vivemedellin.gestion_usuarios.entity.Interes;
-import com.vivemedellin.gestion_usuarios.entity.InteresXUsuario;
-import com.vivemedellin.gestion_usuarios.entity.Municipio;
-import com.vivemedellin.gestion_usuarios.entity.Usuario;
-import com.vivemedellin.gestion_usuarios.repository.InteresRepository;
-import com.vivemedellin.gestion_usuarios.repository.InteresXUsuarioRepository;
-import com.vivemedellin.gestion_usuarios.repository.MunicipioRepository;
-import com.vivemedellin.gestion_usuarios.repository.UsuarioRepository;
+import com.vivemedellin.gestion_usuarios.entity.*;
+import com.vivemedellin.gestion_usuarios.repository.*;
 import com.vivemedellin.gestion_usuarios.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -43,6 +39,9 @@ public class UsuarioController {
 
     @Autowired
     private InteresXUsuarioRepository interesXUsuarioRepository;
+
+    @Autowired
+    private TokenVerificacionRepository tokenVerificacionRepository;
     
     @PostMapping("/registrar")
     public ResponseEntity<String> registrarUsuario(@RequestBody @Valid RegistroUsuarioDTO dto) {
@@ -113,5 +112,22 @@ public class UsuarioController {
 
         return ResponseEntity.ok("Registro completado correctamente");
     }
-   
+
+    @GetMapping("/verificar")
+    public ResponseEntity<String> verificarCorreo(@RequestParam("token") String token) {
+        TokenVerificacion tv = tokenVerificacionRepository.findByToken(token);
+
+        if (tv == null || tv.getExpiracion().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("Token inválido o expirado.");
+        }
+
+        Usuario usuario = tv.getUsuario();
+        usuario.setCorreoVerificado(true);
+        usuarioRepository.save(usuario);
+        tokenVerificacionRepository.delete(tv); // elimina el token tras validarlo
+
+        return ResponseEntity.ok("Correo verificado con éxito.");
+    }
+
+
 }
