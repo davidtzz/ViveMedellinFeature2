@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.vivemedellin.gestion_usuarios.config;
 
 import org.springframework.context.annotation.Bean;
@@ -16,10 +12,15 @@ public class SeguridadConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
-            );
+        http
+                .csrf(csrf -> csrf.disable()) // JWT no requiere CSRF
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**", "/login", "/registro").permitAll()
+                        .anyRequest().authenticated()
+                );
+
         return http.build();
     }
 }
+
+

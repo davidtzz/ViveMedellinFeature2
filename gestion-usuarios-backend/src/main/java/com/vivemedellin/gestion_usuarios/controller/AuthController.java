@@ -16,10 +16,16 @@ import com.vivemedellin.gestion_usuarios.service.UsuarioService;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,7 +83,7 @@ public class AuthController {
     
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO dto) {
-        Usuario usuario = usuarioRepository.findByCorreoElectronico(dto.getCorreo())
+        Usuario usuario = usuarioRepository.findByApodo(dto.getApodo())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas"));
 
         if (!usuario.isRegistradoManual()) {
@@ -92,5 +98,13 @@ public class AuthController {
 
         return ResponseEntity.ok(Collections.singletonMap("token", token));
     }
+
+        @PostMapping("/logout")
+        public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+            // No se puede invalidar un JWT sin mantener estado,
+            // pero puedes devolver un mensaje para que el frontend elimine el token.
+            return ResponseEntity.ok("Logout exitoso. Token eliminado del cliente.");
+        }
+
 }
 
