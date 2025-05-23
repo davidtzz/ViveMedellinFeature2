@@ -124,7 +124,7 @@ public class UsuarioService {
         tokenVerificacionRepository.save(tv);
 
 // Enviar correo
-        String link = "https://vivemedellinfeature2.onrender.com/api/usuarios/verificar?token=" + token;
+        String link = "http://localhost:8080/api/usuarios/verificar?token=" + token;
         correoService.enviarCorreoVerificacion(u.getCorreoElectronico(), link);
     }
 

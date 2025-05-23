@@ -15,7 +15,7 @@ public class SeguridadConfig {
         http
                 .csrf(csrf -> csrf.disable()) // JWT no requiere CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/login", "/registro").permitAll()
+                        .requestMatchers("/api/auth/**", "/login", "/registro","/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
