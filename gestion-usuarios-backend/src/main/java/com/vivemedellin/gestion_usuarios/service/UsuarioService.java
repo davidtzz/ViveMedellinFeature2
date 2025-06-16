@@ -1,5 +1,6 @@
 package com.vivemedellin.gestion_usuarios.service;
 
+import com.vivemedellin.gestion_usuarios.dto.ActualizacionPerfilDTO;
 import com.vivemedellin.gestion_usuarios.dto.RegistroUsuarioDTO;
 import com.vivemedellin.gestion_usuarios.entity.*;
 import com.vivemedellin.gestion_usuarios.repository.*;
@@ -9,7 +10,10 @@ import java.util.UUID;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 
@@ -149,6 +153,72 @@ public class UsuarioService {
 
     return tieneMayuscula && cantidadNumeros >= 3 && tieneEspecial;
 }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public void eliminarCuenta(String correo, String contraseñaConfirmacion) {
+        Usuario usuario = usuarioRepository.findByCorreoElectronico(correo)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        if (!passwordEncoder.matches(contraseñaConfirmacion, usuario.getContraseña())) {
+            throw new IllegalArgumentException("Contraseña incorrecta");
+        }
+
+        // Si hay relaciones en cascada o tablas relacionadas, manéjalo aquí si no tienes cascade delete
+        tokenVerificacionRepository.deleteByUsuario(usuario);
+        interesXUsuarioRepository.deleteByUsuario(usuario);
+        usuarioRepository.delete(usuario);
+    }
+
+    @Transactional
+    public void actualizarPerfil(String correoUsuario, ActualizacionPerfilDTO dto) {
+        Usuario usuario = usuarioRepository.findByCorreoElectronico(correoUsuario)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        // Validar y actualizar apodo solo si fue enviado
+        if (dto.getApodo() != null && !dto.getApodo().equals(usuario.getApodo())) {
+            if (usuarioRepository.existsByApodo(dto.getApodo())) {
+                throw new IllegalArgumentException("El apodo ya está en uso.");
+            }
+
+            for (String palabra : PALABRAS_INAPROPIADAS) {
+                if (dto.getApodo().toLowerCase().contains(palabra)) {
+                    throw new IllegalArgumentException("El apodo contiene palabras inapropiadas.");
+                }
+            }
+
+            usuario.setApodo(dto.getApodo());
+        }
+
+        // Actualizar otros campos si vienen
+        if (dto.getTelefono() != null) usuario.setTelefono(dto.getTelefono());
+        if (dto.getBiografia() != null) usuario.setBiografia(dto.getBiografia());
+        if (dto.getFotoPerfil() != null) usuario.setFotoPerfil(dto.getFotoPerfil());
+
+        // Actualizar municipio si viene
+        if (dto.getIdMunicipio() != null) {
+            Municipio municipio = municipioRepository.findById(dto.getIdMunicipio())
+                    .orElseThrow(() -> new IllegalArgumentException("Municipio no válido"));
+            usuario.setMunicipio(municipio);
+        }
+
+        // Actualizar intereses si viene la lista
+        if (dto.getIdsIntereses() != null) {
+            interesXUsuarioRepository.deleteByUsuario(usuario);
+
+            for (Integer idInteres : dto.getIdsIntereses()) {
+                Interes interes = interesRepository.findById(idInteres)
+                        .orElseThrow(() -> new IllegalArgumentException("Interés con ID " + idInteres + " no válido"));
+                InteresXUsuario ixu = new InteresXUsuario();
+                ixu.setUsuario(usuario);
+                ixu.setInteres(interes);
+                interesXUsuarioRepository.save(ixu);
+            }
+        }
+
+        usuarioRepository.save(usuario);
+    }
 
 
     private String encriptarPassword(String rawPassword) {

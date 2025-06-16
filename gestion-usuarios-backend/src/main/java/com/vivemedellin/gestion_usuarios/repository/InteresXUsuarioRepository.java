@@ -5,10 +5,12 @@
 package com.vivemedellin.gestion_usuarios.repository;
 
 import com.vivemedellin.gestion_usuarios.entity.InteresXUsuario;
+import com.vivemedellin.gestion_usuarios.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * Repositorio para la entidad InteresXUsuario.
  */
 public interface InteresXUsuarioRepository extends JpaRepository<InteresXUsuario, Integer> {
+    void deleteByUsuario(Usuario usuario);
 }

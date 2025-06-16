@@ -5,11 +5,15 @@
 package com.vivemedellin.gestion_usuarios.controller;
 
 
+import com.vivemedellin.gestion_usuarios.config.JwtUtil;
+import com.vivemedellin.gestion_usuarios.dto.ActualizacionPerfilDTO;
+import com.vivemedellin.gestion_usuarios.dto.ConfirmacionEliminacionDTO;
 import com.vivemedellin.gestion_usuarios.dto.RegistroComplementarioDTO;
 import com.vivemedellin.gestion_usuarios.dto.RegistroUsuarioDTO;
 import com.vivemedellin.gestion_usuarios.entity.*;
 import com.vivemedellin.gestion_usuarios.repository.*;
 import com.vivemedellin.gestion_usuarios.service.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +46,9 @@ public class UsuarioController {
 
     @Autowired
     private TokenVerificacionRepository tokenVerificacionRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
     
     @PostMapping("/registrar")
     public ResponseEntity<String> registrarUsuario(@RequestBody @Valid RegistroUsuarioDTO dto) {
@@ -129,5 +136,40 @@ public class UsuarioController {
         return ResponseEntity.ok("Correo verificado con éxito.");
     }
 
+    @DeleteMapping("/eliminar")
+    public ResponseEntity<?> eliminarCuenta(@RequestBody ConfirmacionEliminacionDTO dto,
+                                            @RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token no proporcionado o inválido");
+        }
+
+        String token = authHeader.substring(7); // Quitar "Bearer "
+        String correo = jwtUtil.extractEmail(token);
+
+        try {
+            usuarioService.eliminarCuenta(correo, dto.getContraseña());
+            return ResponseEntity.ok("Cuenta eliminada exitosamente");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/perfil")
+    public ResponseEntity<?> actualizarPerfil(@RequestBody ActualizacionPerfilDTO dto,
+                                              @RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token no proporcionado o inválido");
+        }
+
+        String token = authHeader.substring(7); // Quitar "Bearer "
+        String correo = jwtUtil.extractEmail(token);
+
+        try {
+            usuarioService.actualizarPerfil(correo, dto);
+            return ResponseEntity.ok("Perfil actualizado correctamente");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
 }
