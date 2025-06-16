@@ -1,21 +1,30 @@
-# Etapa 1: construcción usando Maven + JDK
-FROM maven:3.9.6-amazoncorretto AS build
+# Etapa 1: Build con Maven + Java 24 (Amazon Corretto)
+FROM amazoncorretto:24 as build
+
+# Instalamos Maven manualmente
+RUN yum update -y && \
+    yum install -y maven && \
+    yum clean all
 
 WORKDIR /app
 
+# Copiamos el código fuente y pom.xml
 COPY pom.xml .
-RUN mvn dependency:go-offline
-
 COPY src ./src
+
+# Compilamos el proyecto (sin tests)
 RUN mvn clean package -DskipTests
 
-# Etapa 2: imagen final con solo el JAR en Amazon Corretto 24 Alpine
-FROM amazoncorretto:24-alpine-jdk
+# Etapa 2: Imagen final para ejecución
+FROM amazoncorretto:24
 
 WORKDIR /app
 
+# Copiamos el .jar desde la etapa de build
 COPY --from=build /app/target/*.jar app.jar
 
+# Exponemos el puerto que usará la app
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Render usa la variable ${PORT}, así que la respetamos
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT}"]

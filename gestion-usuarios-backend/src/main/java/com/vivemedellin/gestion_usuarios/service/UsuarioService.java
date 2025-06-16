@@ -1,10 +1,9 @@
 package com.vivemedellin.gestion_usuarios.service;
 
-import com.vivemedellin.gestion_usuarios.dto.ActualizacionPerfilDTO;
 import com.vivemedellin.gestion_usuarios.dto.RegistroUsuarioDTO;
 import com.vivemedellin.gestion_usuarios.entity.*;
 import com.vivemedellin.gestion_usuarios.repository.*;
-
+import com.vivemedellin.gestion_usuarios.dto.ActualizacionPerfilDTO;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.time.LocalDate;
